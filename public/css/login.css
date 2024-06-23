@@ -1,0 +1,58 @@
+body {
+    background-color: #f4f4f4;
+}
+
+body ul,
+body li {
+    list-style: none;
+    padding: 0;
+}
+
+.container {
+    width: 400px;
+    height: 300px;
+    border: 1px solid #ccc;
+    padding: 20px;
+    margin: 180px auto 30px auto;
+    border-radius: 20px;
+    background-color: #fff;
+}
+
+.container form li {
+    margin: 10px 0;
+}
+
+.container form li .title {
+    width: 100px;
+    text-align: right;
+    display: inline-block;
+}
+
+.container form input {
+    padding: 8px 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.container form .line {
+    margin-left: 20px;
+}
+
+.container form .line input[type="submit"] {
+    padding: 10px 20px;
+    background: #5a88ff;
+    border: 1px solid #5a88ff;
+    color: #fff;
+    cursor: pointer;
+}
+
+.container form .line input[type="submit"]:hover {
+    background: #265ff3;
+    border: 1px solid #265ff3;
+}
+
+.submit_line a {
+    color: #000;
+    font-size: 14px;
+    margin-left: 10px;
+}
