@@ -18,6 +18,31 @@ body li {
 
 .header {
     height: 40px;
+    background: #fff;
+    overflow: hidden;
+    box-shadow: 1px 1px 6px #636363;
+}
+
+.header .sitename {
+    float: left;
+    margin-left: 10px;
+    font-weight: bold;
+}
+
+.header .userinfo {
+    float: right;
+    margin-right: 10px;
+}
+
+.header .sitename,
+.header .userinfo {
+    line-height: 40px;
+    height: 40px;
+}
+
+.container-full {
+    width: 100%;
+    margin: 0 auto;
 }
 
 .footer {
