@@ -1,0 +1,29 @@
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+body ul,
+body li {
+    list-style: none;
+    padding: 0;
+}
+
+.main {
+    min-height: 100%;
+    height: calc(100vh - 40px - 60px);
+    overflow: hidden;
+}
+
+.header {
+    height: 40px;
+}
+
+.footer {
+    text-align: center;
+    background: #333;
+    color: #999;
+    line-height: 60px;
+    height: 60ph;
+}
