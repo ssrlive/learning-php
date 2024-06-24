@@ -26,7 +26,7 @@
                     <input type="password" name="password2" placeholder="确认密码">
                 </li>
                 <li class="line submit_line" style="margin-top: 50px;">
-                    <input type="submit" name="提交" style="margin-left: 100px;">
+                    <input type="submit" name="submit" value="註冊" style="margin-left: 100px;">
                     <a href="/user/login.php">已有账号?去登录</a>
                 </li>
             </ul>
