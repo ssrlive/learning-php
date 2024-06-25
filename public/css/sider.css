@@ -1,0 +1,19 @@
+.sider {
+    background: #fff;
+    width: 200px;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.sider ul li {
+    margin: 10px 0;
+}
+
+.sider ul li a {
+    color: #000;
+    text-decoration: none;
+}
+
+.sider ul li a:hover {
+    color: #265ff3;
+}
