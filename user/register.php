@@ -14,7 +14,7 @@
     <div class="main">
         <div class="container">
             <h2 style="margin-bottom: 10px; text-align: center;">用户注册</h2>
-            <form id="submit_form">
+            <form id="submit_form" onsubmit="submitForm(event)">
                 <ul>
                     <li class="line">
                         <span class="title">用戶名</span>
@@ -37,6 +37,62 @@
         </div>
     </div>
     <?php include $_SERVER['DOCUMENT_ROOT'] . "/user/common/footer.php"; ?>
+
+    <script>
+        function isEmpty(str) {
+            return str === undefined || str === null || str.trim() === "";
+        }
+
+        function strlenMin(str) {
+            return str.length < 6;
+        }
+
+        function submitForm(event) {
+            event.preventDefault(); // 阻止 表单提交導致的 頁面刷新
+            var form = document.getElementById("submit_form");
+            var formData = new FormData(form);
+            var datas = formData.entries();
+            var pass, pass2;
+            for (var data of datas) {
+                if (isEmpty(data[1])) {
+                    alert(data[0] + "不能为空");
+                    return;
+                }
+                if (data[0].indexOf("password") >= 0) {
+                    if (strlenMin(data[1])) {
+                        alert("密码长度不能小于6位");
+                        return;
+                    }
+                    if (data[0] === "password") {
+                        pass = data[1];
+                    } else {
+                        pass2 = data[1];
+                    }
+                }
+            }
+            if (pass && pass2 && pass !== pass2) {
+                alert("两次密码不一致");
+                return;
+            }
+
+            var url = "/api/register.php";
+            fetch(url, {
+                    method: "POST",
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    if (data.code === 0) {
+                        console.log("注册成功");
+                        window.location.href = "/user/login.php";
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
 </body>
 
 </html>
