@@ -187,9 +187,19 @@ class Db
         return $this;
     }
 
-    public function getLastSql()
+    public function getSqlString()
     {
-        return self::$stmt->queryString;
+        $sql = "SELECT " . self::$fields . " FROM " . self::$tablename;
+        if (!empty(self::$where)) {
+            $sql .= " " . self::$where;
+        }
+        if (!empty(self::$orderBy)) {
+            $sql .= self::$orderBy;
+        }
+        if (!empty(self::$limit)) {
+            $sql .= self::$limit;
+        }
+        return $sql;
     }
 
     public function count()
@@ -202,17 +212,7 @@ class Db
     public function select()
     {
         try {
-            $sql = "SELECT " . self::$fields . " FROM " . self::$tablename;
-            if (!empty(self::$where)) {
-                $sql .= " " . self::$where;
-            }
-            if (!empty(self::$orderBy)) {
-                $sql .= self::$orderBy;
-            }
-            if (!empty(self::$limit)) {
-                $sql .= self::$limit;
-            }
-            // echo $sql . "\n";
+            $sql = $this->getSqlString();
             self::$stmt = self::$pdo->prepare($sql);
             if (self::$executeData !== []) {
                 self::$stmt->execute(self::$executeData);
@@ -243,7 +243,7 @@ class Db
 //     ->whereNotNull("createtime")
 //     ->orderBy("id", "DESC");
 // $result = $obj->select();
-// $sql = $obj->getLastSql();
+// $sql = $obj->getSqlString();
 // echo $sql . "\n";
 
 
@@ -251,6 +251,6 @@ class Db
 //     ->fields(["id", "username", "password"])
 //     ->orderBy("id", "DESC");
 // $result = $obj->count();
-// $sql = $obj->getLastSql();
+// $sql = $obj->getSqlString();
 // echo $sql . "\n";
 // var_dump($result);
