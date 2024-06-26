@@ -248,6 +248,11 @@ class Db
         }
     }
 
+    /**
+     * Insert data to the table
+     * @param array $data
+     * @return int The last insert id
+     */
     public function insert(array $data): int
     {
         if (empty($data)) {

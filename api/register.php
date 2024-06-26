@@ -1,6 +1,9 @@
 <?php
 session_start();
 
+require __DIR__ . "/../func/Db.class.php";
+// require $_SERVER['DOCUMENT_ROOT'] . "/func/Db.class.php";
+
 /**
  * 检查注册频率, 返回封禁信息. 例如，3分鐘內不超過10次請求，否則封禁 1 小時
  * @param int $reg_limit_seconds 注册时间限制，单位秒
@@ -74,13 +77,28 @@ if ($message === null) {
     $message = checkRegistrationFrequency();
 }
 
-$responseData = [
-    "code" => 0,
-    "message" => $message,
-    "data" => []
-];
-if ($message !== null) {
-    $responseData["code"] = 400;
+$result = 0;
+if ($message === null) {
+    $username = $_POST["username"];
+    $password = $_POST["password"];
+    $result = Db::table("users")->where([["username", "=", $username]])->find();
+    if ($result) {
+        $result = $username;
+        $message = "用户名已存在";
+    } else {
+        $result = Db::table("users")->insert(["username" => $username, "password" => md5($password)]);
+        if ($result >= 0) {
+            $message = null;
+        } else {
+            $message = "注册失败";
+        }
+    }
 }
+
+$responseData = [
+    "code" => $message !== null ? 400 : 0,
+    "message" => $message,
+    "data" => $result,
+];
 
 print_r(json_encode($responseData, JSON_UNESCAPED_UNICODE));
