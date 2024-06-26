@@ -182,26 +182,30 @@ class Db
 
     public function select()
     {
-        $sql = "SELECT * FROM " . self::$tablename;
-        if (!empty(self::$where)) {
-            $sql .= " " . self::$where;
+        try {
+            $sql = "SELECT * FROM " . self::$tablename;
+            if (!empty(self::$where)) {
+                $sql .= " " . self::$where;
+            }
+            if (!empty(self::$orderBy)) {
+                $sql .= self::$orderBy;
+            }
+            if (!empty(self::$limit)) {
+                $sql .= self::$limit;
+            }
+            // echo $sql . "\n";
+            self::$stmt = self::$pdo->prepare($sql);
+            if (self::$executeData !== []) {
+                self::$stmt->execute(self::$executeData);
+            } else {
+                self::$stmt->execute();
+            }
+            $result = self::$stmt->fetchAll(PDO::FETCH_ASSOC);
+            self::$stmt->closeCursor();
+            return $result;
+        } catch (PDOException $e) {
+            throw new Exception("Select failed: " . $e->getMessage());
         }
-        if (!empty(self::$orderBy)) {
-            $sql .= self::$orderBy;
-        }
-        if (!empty(self::$limit)) {
-            $sql .= self::$limit;
-        }
-        echo $sql . "\n";
-        self::$stmt = self::$pdo->prepare($sql);
-        if (self::$executeData !== []) {
-            self::$stmt->execute(self::$executeData);
-        } else {
-            self::$stmt->execute();
-        }
-        $result = self::$stmt->fetchAll(PDO::FETCH_ASSOC);
-        self::$stmt->closeCursor();
-        return $result;
     }
 }
 
