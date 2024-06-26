@@ -10,6 +10,9 @@ class Db
     public static ?PDO $pdo = null;
     public static ?PDOStatement $stmt = null;
     public static array $executeData = [];
+    // 判斷是否在 where 組內 ()
+    private $isGrouping = false;
+    private $whereAndOrNot = "AND";
 
     public function __construct()
     {
@@ -47,11 +50,18 @@ class Db
         return new self();
     }
 
-    public function where(array $condition, string $andOrNot = "AND")
+    public function where(array|Closure $condition, string $andOrNot = "AND")
     {
         $_andOrNot = strtoupper($andOrNot);
         $where = "";
         if (!empty($condition)) {
+            if ($condition instanceof Closure) {
+                $this->isGrouping = true;
+                $this->whereAndOrNot = $_andOrNot;
+                $condition($this);
+                $this->isGrouping = false;
+                return $this;
+            }
             $whereArray = [];
             $executeData = [];
             foreach ($condition as $value) {
@@ -75,11 +85,15 @@ class Db
             } else if ($_andOrNot === "NOT") {
                 // NOT (a AND b   c)
                 $where = "NOT (" . implode(" AND ", $whereArray) . ")";
-            } else if ($_andOrNot === "ORNOT") {
+            } else if ($_andOrNot === "OR NOT") {
                 // NOT (a OR b OR c)
                 $where = "NOT (" . implode(" OR ", $whereArray) . ")";
             } else {
-                throw new Exception("The second parameter of the where method must be 'AND', 'OR' or 'NOT' or 'ORNOT'.");
+                throw new Exception("The second parameter of the where method must be 'AND', 'OR' or 'NOT' or 'OR NOT'.");
+            }
+
+            if ($this->isGrouping) {
+                $where = "( $where )";
             }
 
             if (self::$executeData !== []) {
@@ -89,24 +103,28 @@ class Db
             }
         }
 
-        $this->buildWhere($where, $_andOrNot);
+        if ($this->isGrouping) {
+            $this->buildWhere($where, $this->whereAndOrNot);
+        } else {
+            $this->buildWhere($where, $_andOrNot);
+        }
 
         return $this;
     }
 
-    public function whereOr(array $condition)
+    public function whereOr(array|Closure $condition)
     {
         return $this->where($condition, "OR");
     }
 
-    public function whereNot(array $condition)
+    public function whereNot(array|Closure $condition)
     {
         return $this->where($condition, "NOT");
     }
 
-    public function whereOrNot(array $condition)
+    public function whereOrNot(array|Closure $condition)
     {
-        return $this->where($condition, "ORNOT");
+        return $this->where($condition, "OR NOT");
     }
 
     public function whereNull($field, string $andOrNot = "AND")
@@ -154,12 +172,17 @@ class Db
 }
 
 $result = Db::table("users")
-    ->where([
-        ["createtime", "between", ["2024-01-01", "2024-12-31"]]
-    ], "OR")
-    ->whereOr([
-        ["id", "in", [1, 2, 3]]
-    ])
+    ->where(
+        function ($query) {
+            $query->where([["createtime", "between", ["2024-01-01", "2024-12-31"]]]);
+        },
+        "OR"
+    )
+    ->whereOr(
+        function ($query) {
+            $query->where([["id", "in", [1, 2, 3]]]);
+        }
+    )
     ->whereNotNull("createtime")
     ->select();
 var_dump($result);
