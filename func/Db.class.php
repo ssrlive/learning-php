@@ -7,6 +7,7 @@ class Db
 {
     public static string $tablename;
     public static string $where = "";
+    public static string $orderBy = "";
     public static ?PDO $pdo = null;
     public static ?PDOStatement $stmt = null;
     public static array $executeData = [];
@@ -152,11 +153,24 @@ class Db
         }
     }
 
+    public function orderBy(string $field, string $sort = "ASC")
+    {
+        $sort = strtoupper($sort);
+        if ($sort !== "ASC" && $sort !== "DESC") {
+            throw new Exception("The second parameter of the orderBy method must be 'ASC' or 'DESC'.");
+        }
+        self::$orderBy .= " ORDER BY $field $sort";
+        return $this;
+    }
+
     public function select()
     {
         $sql = "SELECT * FROM " . self::$tablename;
         if (!empty(self::$where)) {
             $sql .= " " . self::$where;
+        }
+        if (!empty(self::$orderBy)) {
+            $sql .= self::$orderBy;
         }
         echo $sql . "\n";
         self::$stmt = self::$pdo->prepare($sql);
@@ -184,5 +198,6 @@ $result = Db::table("users")
         }
     )
     ->whereNotNull("createtime")
+    ->orderBy("id", "DESC")
     ->select();
 var_dump($result);
