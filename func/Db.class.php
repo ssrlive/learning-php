@@ -25,7 +25,7 @@ class Db
         $dsn = "$dbms:host=$host;dbname=$dbname;charset=utf8";
         try {
             self::$pdo = new PDO($dsn, $user, $password);
-            echo "连接成功\n";
+            // echo "连接成功\n";
         } catch (PDOException $e) {
             throw new Exception("Database connection failed: " . $e->getMessage());
         }
@@ -50,16 +50,17 @@ class Db
             $whereArray = [];
             $executeData = [];
             foreach ($condition as $value) {
-                if ($value[1] === "between") {
-                    $whereArray[] = "$value[0] $value[1] ? AND ?";
+                $verb = strtoupper($value[1]);
+                if ($verb === "BETWEEN") {
+                    $whereArray[] = "$value[0] $verb ? AND ?";
                     $executeData[] = $value[2][0];
                     $executeData[] = $value[2][1];
-                } else if ($value[1] === "in") {
+                } else if ($verb === "IN") {
                     $in = implode(",", array_fill(0, count($value[2]), "?"));
-                    $whereArray[] = "$value[0] $value[1] ($in)";
+                    $whereArray[] = "$value[0] $verb ($in)";
                     $executeData = array_merge($executeData, $value[2]);
                 } else {
-                    $whereArray[] = "$value[0] $value[1] ?";
+                    $whereArray[] = "$value[0] $verb ?";
                     $executeData[] = $value[2];
                 }
             }
@@ -74,6 +75,20 @@ class Db
 
         $this->buildWhere($where);
 
+        return $this;
+    }
+
+    public function whereNull($field)
+    {
+        $where = "$field IS NULL";
+        $this->buildWhere($where);
+        return $this;
+    }
+
+    public function whereNotNull($field)
+    {
+        $where = "$field IS NOT NULL";
+        $this->buildWhere($where);
         return $this;
     }
 
@@ -94,6 +109,7 @@ class Db
         if (!empty(self::$where)) {
             $sql .= " " . self::$where;
         }
+        // echo $sql . "\n";
         self::$stmt = self::$pdo->prepare($sql);
         if (self::$executeData !== []) {
             self::$stmt->execute(self::$executeData);
@@ -113,5 +129,6 @@ $result = Db::table("users")
     ->where([
         ["id", "in", [1, 2, 3]]
     ])
+    ->whereNotNull("createtime")
     ->select();
 var_dump($result);
