@@ -8,6 +8,7 @@ class Db
     public static string $tablename;
     public static string $where = "";
     public static string $orderBy = "";
+    public static string $limit = "";
     public static ?PDO $pdo = null;
     public static ?PDOStatement $stmt = null;
     public static array $executeData = [];
@@ -163,6 +164,22 @@ class Db
         return $this;
     }
 
+    public function limit(int $limit, int $offset = null)
+    {
+        if ($offset !== null) {
+            self::$limit = " LIMIT $offset, $limit";
+        } else {
+            self::$limit = " LIMIT $limit";
+        }
+        return $this;
+    }
+
+    public function find()
+    {
+        $result = $this->limit(1)->select();
+        return isset($result[0]) ? $result[0] : false;
+    }
+
     public function select()
     {
         $sql = "SELECT * FROM " . self::$tablename;
@@ -171,6 +188,9 @@ class Db
         }
         if (!empty(self::$orderBy)) {
             $sql .= self::$orderBy;
+        }
+        if (!empty(self::$limit)) {
+            $sql .= self::$limit;
         }
         echo $sql . "\n";
         self::$stmt = self::$pdo->prepare($sql);
@@ -199,5 +219,6 @@ $result = Db::table("users")
     )
     ->whereNotNull("createtime")
     ->orderBy("id", "DESC")
-    ->select();
+    // ->select();
+    ->find();
 var_dump($result);
