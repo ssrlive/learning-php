@@ -226,6 +226,73 @@ class Db
             throw new Exception("Select failed: " . $e->getMessage());
         }
     }
+
+    public function delete(): int
+    {
+        try {
+            $sql = "DELETE FROM " . self::$tablename;
+            if (!empty(self::$where)) {
+                $sql .= " " . self::$where;
+            }
+            self::$stmt = self::$pdo->prepare($sql);
+            if (self::$executeData !== []) {
+                self::$stmt->execute(self::$executeData);
+            } else {
+                self::$stmt->execute();
+            }
+            $result = self::$stmt->rowCount();
+            self::$stmt->closeCursor();
+            return $result;
+        } catch (PDOException $e) {
+            throw new Exception("Delete failed: " . $e->getMessage());
+        }
+    }
+
+    public function insert(array $data): int
+    {
+        if (empty($data)) {
+            throw new Exception("Insert: the data parameter cannot be empty.");
+        }
+        $fields = implode(",", array_keys($data));
+        $values = implode(",", array_fill(0, count($data), "?"));
+        $sql = "INSERT INTO " . self::$tablename . " ($fields) VALUES ($values)";
+        try {
+            self::$stmt = self::$pdo->prepare($sql);
+            self::$stmt->execute(array_values($data));
+            $result = self::$pdo->lastInsertId();
+            self::$stmt->closeCursor();
+            return $result;
+        } catch (PDOException $e) {
+            throw new Exception("Insert failed: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Update data
+     * @param array $data
+     * @return int
+     */
+    public function update(array $data): int
+    {
+        if (empty($data)) {
+            throw new Exception("Update: the data parameter cannot be empty.");
+        }
+        $executeData = array_values($data);
+        $set = implode("=?, ", array_keys($data)) . "=?";
+        $sql = "UPDATE " . self::$tablename . " SET $set";
+        if (!empty(self::$where)) {
+            $sql .= " " . self::$where;
+        }
+        try {
+            self::$stmt = self::$pdo->prepare($sql);
+            self::$stmt->execute(array_merge($executeData, self::$executeData));
+            $result = self::$stmt->rowCount();
+            self::$stmt->closeCursor();
+            return $result;
+        } catch (PDOException $e) {
+            throw new Exception("Update failed: " . $e->getMessage());
+        }
+    }
 }
 
 // $obj = Db::table("users")
@@ -246,11 +313,23 @@ class Db
 // $sql = $obj->getSqlString();
 // echo $sql . "\n";
 
-
 // $obj = Db::table("users")
 //     ->fields(["id", "username", "password"])
 //     ->orderBy("id", "DESC");
 // $result = $obj->count();
 // $sql = $obj->getSqlString();
 // echo $sql . "\n";
+// var_dump($result);
+
+// $result = Db::table("users")->insert(["username" => "test3", "password" => "123456"]);
+// var_dump($result);
+
+// $result = Db::table("users")
+//     ->where([["id", "=", 1]])
+//     ->update(["username" => "tezcxzxcst99", "password" => "123zxczxc456"]);
+// var_dump($result);
+
+// $result = Db::table("users")
+//     ->where([["id", "=", 3]])
+//     ->delete();
 // var_dump($result);
