@@ -50,8 +50,14 @@ class Db
             $whereArray = [];
             $executeData = [];
             foreach ($condition as $key => $value) {
-                $whereArray[] = "$value[0] $value[1] ?";
-                $executeData[] = $value[2];
+                if ($value[1] === "between") {
+                    $whereArray[] = "$value[0] $value[1] ? AND ?";
+                    $executeData[] = $value[2][0];
+                    $executeData[] = $value[2][1];
+                } else {
+                    $whereArray[] = "$value[0] $value[1] ?";
+                    $executeData[] = $value[2];
+                }
             }
             $where = implode(" AND ", $whereArray);
 
@@ -91,7 +97,7 @@ class Db
     }
 }
 
-$result = Db::table("users")->where([["username", "=", "admin"]])
-    ->where([["password", "=", "123456"]])
+$result = Db::table("users")
+    ->where([["createtime", "between", ["2024-01-01", "2024-12-31"]]])
     ->select();
 var_dump($result);
