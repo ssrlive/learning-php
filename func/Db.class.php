@@ -6,6 +6,7 @@ if (version_compare(PHP_VERSION, '7.4', '<')) {
 class Db
 {
     public static string $tablename;
+    public static string $fields = "*";
     public static string $where = "";
     public static string $orderBy = "";
     public static string $limit = "";
@@ -180,10 +181,28 @@ class Db
         return isset($result[0]) ? $result[0] : false;
     }
 
+    public function fields(array $fields)
+    {
+        self::$fields = implode(",", $fields);
+        return $this;
+    }
+
+    public function getLastSql()
+    {
+        return self::$stmt->queryString;
+    }
+
+    public function count()
+    {
+        self::$fields = "COUNT(*) AS count";
+        $result = $this->find();
+        return $result["count"];
+    }
+
     public function select()
     {
         try {
-            $sql = "SELECT * FROM " . self::$tablename;
+            $sql = "SELECT " . self::$fields . " FROM " . self::$tablename;
             if (!empty(self::$where)) {
                 $sql .= " " . self::$where;
             }
@@ -209,20 +228,29 @@ class Db
     }
 }
 
-$result = Db::table("users")
-    ->where(
-        function ($query) {
-            $query->where([["createtime", "between", ["2024-01-01", "2024-12-31"]]]);
-        },
-        "OR"
-    )
-    ->whereOr(
-        function ($query) {
-            $query->where([["id", "in", [1, 2, 3]]]);
-        }
-    )
-    ->whereNotNull("createtime")
-    ->orderBy("id", "DESC")
-    // ->select();
-    ->find();
-var_dump($result);
+// $obj = Db::table("users")
+//     ->where(
+//         function ($query) {
+//             $query->where([["createtime", "between", ["2024-01-01", "2024-12-31"]]]);
+//         },
+//         "OR"
+//     )
+//     ->whereOr(
+//         function ($query) {
+//             $query->where([["id", "in", [1, 2, 3]]]);
+//         }
+//     )
+//     ->whereNotNull("createtime")
+//     ->orderBy("id", "DESC");
+// $result = $obj->select();
+// $sql = $obj->getLastSql();
+// echo $sql . "\n";
+
+
+// $obj = Db::table("users")
+//     ->fields(["id", "username", "password"])
+//     ->orderBy("id", "DESC");
+// $result = $obj->count();
+// $sql = $obj->getLastSql();
+// echo $sql . "\n";
+// var_dump($result);
