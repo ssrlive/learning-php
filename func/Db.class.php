@@ -72,6 +72,13 @@ class Db
             }
         }
 
+        $this->buildWhere($where);
+
+        return $this;
+    }
+
+    private function buildWhere($where)
+    {
         if ($where !== "") {
             if (strpos(self::$where, "WHERE") === false) {
                 self::$where = "WHERE " . $where;
@@ -79,8 +86,6 @@ class Db
                 self::$where .= " AND " . $where;
             }
         }
-
-        return $this;
     }
 
     public function select()
