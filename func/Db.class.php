@@ -49,11 +49,15 @@ class Db
         if (!empty($condition)) {
             $whereArray = [];
             $executeData = [];
-            foreach ($condition as $key => $value) {
+            foreach ($condition as $value) {
                 if ($value[1] === "between") {
                     $whereArray[] = "$value[0] $value[1] ? AND ?";
                     $executeData[] = $value[2][0];
                     $executeData[] = $value[2][1];
+                } else if ($value[1] === "in") {
+                    $in = implode(",", array_fill(0, count($value[2]), "?"));
+                    $whereArray[] = "$value[0] $value[1] ($in)";
+                    $executeData = array_merge($executeData, $value[2]);
                 } else {
                     $whereArray[] = "$value[0] $value[1] ?";
                     $executeData[] = $value[2];
@@ -98,6 +102,11 @@ class Db
 }
 
 $result = Db::table("users")
-    ->where([["createtime", "between", ["2024-01-01", "2024-12-31"]]])
+    ->where([
+        ["createtime", "between", ["2024-01-01", "2024-12-31"]]
+    ])
+    ->where([
+        ["id", "in", [1, 2, 3]]
+    ])
     ->select();
 var_dump($result);
