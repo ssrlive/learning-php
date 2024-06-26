@@ -1,4 +1,8 @@
 <?php
+if (version_compare(PHP_VERSION, '7.4', '<')) {
+    die('This Application requires PHP version 7.4 or higher.');
+}
+
 class Db
 {
     public static string $tablename;
@@ -43,8 +47,9 @@ class Db
         return new self();
     }
 
-    public function where(array $condition)
+    public function where(array $condition, string $andOrNot = "AND")
     {
+        $_andOrNot = strtoupper($andOrNot);
         $where = "";
         if (!empty($condition)) {
             $whereArray = [];
@@ -64,7 +69,18 @@ class Db
                     $executeData[] = $value[2];
                 }
             }
-            $where = implode(" AND ", $whereArray);
+
+            if ($_andOrNot === "AND" || $_andOrNot === "OR") {
+                $where = implode(" $_andOrNot ", $whereArray);
+            } else if ($_andOrNot === "NOT") {
+                // NOT (a AND b   c)
+                $where = "NOT (" . implode(" AND ", $whereArray) . ")";
+            } else if ($_andOrNot === "ORNOT") {
+                // NOT (a OR b OR c)
+                $where = "NOT (" . implode(" OR ", $whereArray) . ")";
+            } else {
+                throw new Exception("The second parameter of the where method must be 'AND', 'OR' or 'NOT' or 'ORNOT'.");
+            }
 
             if (self::$executeData !== []) {
                 self::$executeData = array_merge(self::$executeData, $executeData);
@@ -73,32 +89,47 @@ class Db
             }
         }
 
-        $this->buildWhere($where);
+        $this->buildWhere($where, $_andOrNot);
 
         return $this;
     }
 
-    public function whereNull($field)
+    public function whereOr(array $condition)
+    {
+        return $this->where($condition, "OR");
+    }
+
+    public function whereNot(array $condition)
+    {
+        return $this->where($condition, "NOT");
+    }
+
+    public function whereOrNot(array $condition)
+    {
+        return $this->where($condition, "ORNOT");
+    }
+
+    public function whereNull($field, string $andOrNot = "AND")
     {
         $where = "$field IS NULL";
-        $this->buildWhere($where);
+        $this->buildWhere($where, $andOrNot);
         return $this;
     }
 
-    public function whereNotNull($field)
+    public function whereNotNull($field, string $andOrNot = "AND")
     {
         $where = "$field IS NOT NULL";
-        $this->buildWhere($where);
+        $this->buildWhere($where, $andOrNot);
         return $this;
     }
 
-    private function buildWhere($where)
+    private function buildWhere($where, string $andOrNot = "AND")
     {
         if ($where !== "") {
             if (strpos(self::$where, "WHERE") === false) {
                 self::$where = "WHERE " . $where;
             } else {
-                self::$where .= " AND " . $where;
+                self::$where .= " " . $andOrNot . " " . $where;
             }
         }
     }
@@ -109,7 +140,7 @@ class Db
         if (!empty(self::$where)) {
             $sql .= " " . self::$where;
         }
-        // echo $sql . "\n";
+        echo $sql . "\n";
         self::$stmt = self::$pdo->prepare($sql);
         if (self::$executeData !== []) {
             self::$stmt->execute(self::$executeData);
@@ -125,8 +156,8 @@ class Db
 $result = Db::table("users")
     ->where([
         ["createtime", "between", ["2024-01-01", "2024-12-31"]]
-    ])
-    ->where([
+    ], "OR")
+    ->whereOr([
         ["id", "in", [1, 2, 3]]
     ])
     ->whereNotNull("createtime")
