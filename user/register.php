@@ -53,6 +53,7 @@
             var formData = new FormData(form);
             var datas = formData.entries();
             var pass, pass2;
+            var username;
             for (var data of datas) {
                 if (isEmpty(data[1])) {
                     alert(data[0] + "不能为空");
@@ -68,6 +69,9 @@
                     } else {
                         pass2 = data[1];
                     }
+                }
+                if (data[0] === "username") {
+                    username = data[1];
                 }
             }
             if (pass && pass2 && pass !== pass2) {
@@ -85,7 +89,7 @@
                     console.log(data);
                     if (data.code === 0) {
                         console.log("注册成功");
-                        window.location.href = "/user/login.php";
+                        window.location.href = "/user/login.php?username=" + username;
                     } else {
                         alert(data.message);
                     }
