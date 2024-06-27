@@ -26,13 +26,13 @@ if ($message === null) {
 $result = 0;
 if ($message === null) {
     $username = $_POST["username"];
-    $password = $_POST["password"];
+    $password = password_hash($_POST["password"], PASSWORD_DEFAULT);
     $result = Db::table("users")->where([["username", "=", $username]])->find();
     if ($result) {
         $result = $username;
         $message = "用户名已存在";
     } else {
-        $result = Db::table("users")->insert(["username" => $username, "password" => md5x2($password)]);
+        $result = Db::table("users")->insert(["username" => $username, "password" => $password]);
         if ($result >= 0) {
             $message = null;
         } else {

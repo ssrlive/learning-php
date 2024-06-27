@@ -57,12 +57,6 @@ function strlenMin($str)
     return strlen($str) < 6;
 }
 
-// Double md5 hash
-function md5x2($str, $salt = "salt")
-{
-    return md5(md5($str) . $salt);
-}
-
 function json($data)
 {
     return json_encode($data, JSON_UNESCAPED_UNICODE);
