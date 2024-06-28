@@ -27,10 +27,11 @@ if ($message === null) {
                 "login_ip" => $_SERVER["REMOTE_ADDR"],
             ]);
             if ($result >= 0) {
-                $_SESSION["userinfo"] = [
+                $loginInfo = [
                     "userid" => $userinfo["id"],
                     "username" => $userinfo["username"],
                 ];
+                setSessionLogin($loginInfo);
             } else {
                 $message = "記錄登錄信息失敗";
             }
@@ -43,6 +44,6 @@ if ($message === null) {
 $responseData = [
     "code" => $message !== null ? 400 : 0,
     "message" => $message !== null ? $message : "登录成功",
-    "data" => $_SESSION["userinfo"],
+    "data" => getSessionLoginInfo()
 ];
 print_r(json($responseData));

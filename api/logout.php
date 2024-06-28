@@ -5,8 +5,8 @@ if (session_status() == PHP_SESSION_NONE) {
 
 require_once __DIR__ . "/../func/Func.php";
 
-if (isset($_SESSION["userinfo"])) {
-    unset($_SESSION["userinfo"]);
+if (isSessionLoggedIn()) {
+    setSessionLogout();
     $message = "Logout successfully";
     $code = 0;
 } else {

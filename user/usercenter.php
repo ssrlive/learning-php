@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 
+<?php
+require $_SERVER['DOCUMENT_ROOT'] . "/func/Func.php";
+?>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">

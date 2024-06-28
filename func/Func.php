@@ -112,3 +112,27 @@ function json($data)
 {
     return json_encode($data, JSON_UNESCAPED_UNICODE);
 }
+
+function setSessionLogin(array $loginInfo)
+{
+    $_SESSION["loginInfo"] = $loginInfo;
+}
+
+function getSessionLoginInfo(): ?array
+{
+    if (isSessionLoggedIn()) {
+        return $_SESSION["loginInfo"];
+    } else {
+        return null;
+    }
+}
+
+function isSessionLoggedIn(): bool
+{
+    return isset($_SESSION["loginInfo"]);
+}
+
+function setSessionLogout()
+{
+    unset($_SESSION["loginInfo"]);
+}
