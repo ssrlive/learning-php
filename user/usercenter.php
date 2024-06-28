@@ -3,6 +3,11 @@
 
 <?php
 require $_SERVER['DOCUMENT_ROOT'] . "/func/Func.php";
+if (!isSessionLoggedIn()) {
+    header("Location: /user/login.php");
+    exit();
+}
+$userinfo = getSessionLoginInfo();
 ?>
 
 <head>

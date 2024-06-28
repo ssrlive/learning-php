@@ -8,7 +8,10 @@
 </div>
 
 <script>
-    document.getElementById("logout").addEventListener("click", function() {
+    document.getElementById("logout").addEventListener("click", doLogout);
+    document.getElementById("logout2").addEventListener("click", doLogout);
+
+    function doLogout() {
         fetch("/api/logout.php", {
             method: "POST",
             headers: {
@@ -25,5 +28,5 @@
         }).catch(error => {
             console.error("Error:", error);
         });
-    });
+    }
 </script>
