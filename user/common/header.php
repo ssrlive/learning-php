@@ -15,3 +15,6 @@
         </div>
     </div>
 </div>
+
+<script src="/public/js/logout.js">
+</script>
