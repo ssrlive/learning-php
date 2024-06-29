@@ -1,10 +1,10 @@
 <?php
 session_start();
 
-require __DIR__ . "/../func/Db.class.php";
-// require $_SERVER['DOCUMENT_ROOT'] . "/func/Db.class.php";
+require_once __DIR__ . "/../func/Db.class.php";
+// require_once $_SERVER['DOCUMENT_ROOT'] . "/func/Db.class.php";
 
-require __DIR__ . "/../func/Func.php";
+require_once __DIR__ . "/../func/Func.php";
 
 $message = null;
 foreach (["password", "username"] as $key) {
