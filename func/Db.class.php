@@ -5,14 +5,14 @@ if (version_compare(PHP_VERSION, '7.4', '<')) {
 
 class Db
 {
-    public static string $tablename;
-    public static string $fields = "*";
-    public static string $where = "";
-    public static string $orderBy = "";
-    public static string $limit = "";
     public static ?PDO $pdo = null;
-    public static ?PDOStatement $stmt = null;
-    public static array $executeData = [];
+
+    private string $tablename;
+    private array $executeData = [];
+    private string $fields = "*";
+    private string $where = "";
+    private string $orderBy = "";
+    private string $limit = "";
     // 判斷是否在 where 組內 ()
     private $isGrouping = false;
     private $whereAndOrNot = "AND";
@@ -49,18 +49,19 @@ class Db
 
     public static function table($tablename)
     {
-        self::$tablename = $tablename;
-        return new self();
+        $obj = new self();
+        $obj->tablename = $tablename;
+        return $obj;
     }
 
     public function where(array|Closure $condition, string $andOrNot = "AND")
     {
-        $_andOrNot = strtoupper($andOrNot);
+        $andOrNot = strtoupper($andOrNot);
         $where = "";
         if (!empty($condition)) {
             if ($condition instanceof Closure) {
                 $this->isGrouping = true;
-                $this->whereAndOrNot = $_andOrNot;
+                $this->whereAndOrNot = $andOrNot;
                 $condition($this);
                 $this->isGrouping = false;
                 return $this;
@@ -83,12 +84,12 @@ class Db
                 }
             }
 
-            if ($_andOrNot === "AND" || $_andOrNot === "OR") {
-                $where = implode(" $_andOrNot ", $whereArray);
-            } else if ($_andOrNot === "NOT") {
+            if ($andOrNot === "AND" || $andOrNot === "OR") {
+                $where = implode(" $andOrNot ", $whereArray);
+            } else if ($andOrNot === "NOT") {
                 // NOT (a AND b   c)
                 $where = "NOT (" . implode(" AND ", $whereArray) . ")";
-            } else if ($_andOrNot === "OR NOT") {
+            } else if ($andOrNot === "OR NOT") {
                 // NOT (a OR b OR c)
                 $where = "NOT (" . implode(" OR ", $whereArray) . ")";
             } else {
@@ -99,17 +100,17 @@ class Db
                 $where = "( $where )";
             }
 
-            if (self::$executeData !== []) {
-                self::$executeData = array_merge(self::$executeData, $executeData);
+            if ($this->executeData !== []) {
+                $this->executeData = array_merge($this->executeData, $executeData);
             } else {
-                self::$executeData = $executeData;
+                $this->executeData = $executeData;
             }
         }
 
         if ($this->isGrouping) {
             $this->buildWhere($where, $this->whereAndOrNot);
         } else {
-            $this->buildWhere($where, $_andOrNot);
+            $this->buildWhere($where, $andOrNot);
         }
 
         return $this;
@@ -147,10 +148,10 @@ class Db
     private function buildWhere($where, string $andOrNot = "AND")
     {
         if ($where !== "") {
-            if (strpos(self::$where, "WHERE") === false) {
-                self::$where = "WHERE " . $where;
+            if (strpos($this->where, "WHERE") === false) {
+                $this->where = "WHERE " . $where;
             } else {
-                self::$where .= " " . $andOrNot . " " . $where;
+                $this->where .= " " . $andOrNot . " " . $where;
             }
         }
     }
@@ -161,16 +162,16 @@ class Db
         if ($sort !== "ASC" && $sort !== "DESC") {
             throw new Exception("The second parameter of the orderBy method must be 'ASC' or 'DESC'.");
         }
-        self::$orderBy .= " ORDER BY $field $sort";
+        $this->orderBy .= " ORDER BY $field $sort";
         return $this;
     }
 
     public function limit(int $limit, int $offset = null)
     {
         if ($offset !== null) {
-            self::$limit = " LIMIT $offset, $limit";
+            $this->limit = " LIMIT $offset, $limit";
         } else {
-            self::$limit = " LIMIT $limit";
+            $this->limit = " LIMIT $limit";
         }
         return $this;
     }
@@ -183,28 +184,28 @@ class Db
 
     public function fields(array $fields)
     {
-        self::$fields = implode(",", $fields);
+        $this->fields = implode(",", $fields);
         return $this;
     }
 
     public function getSqlString()
     {
-        $sql = "SELECT " . self::$fields . " FROM " . self::$tablename;
-        if (!empty(self::$where)) {
-            $sql .= " " . self::$where;
+        $sql = "SELECT " . $this->fields . " FROM " . $this->tablename;
+        if (!empty($this->where)) {
+            $sql .= " " . $this->where;
         }
-        if (!empty(self::$orderBy)) {
-            $sql .= self::$orderBy;
+        if (!empty($this->orderBy)) {
+            $sql .= $this->orderBy;
         }
-        if (!empty(self::$limit)) {
-            $sql .= self::$limit;
+        if (!empty($this->limit)) {
+            $sql .= $this->limit;
         }
         return $sql;
     }
 
     public function count()
     {
-        self::$fields = "COUNT(*) AS count";
+        $this->fields = "COUNT(*) AS count";
         $result = $this->find();
         return $result["count"];
     }
@@ -213,14 +214,14 @@ class Db
     {
         try {
             $sql = $this->getSqlString();
-            self::$stmt = self::$pdo->prepare($sql);
-            if (self::$executeData !== []) {
-                self::$stmt->execute(self::$executeData);
+            $stmt = self::$pdo->prepare($sql);
+            if ($this->executeData !== []) {
+                $stmt->execute($this->executeData);
             } else {
-                self::$stmt->execute();
+                $stmt->execute();
             }
-            $result = self::$stmt->fetchAll(PDO::FETCH_ASSOC);
-            self::$stmt->closeCursor();
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $stmt->closeCursor();
             return $result;
         } catch (PDOException $e) {
             throw new Exception("Select failed: " . $e->getMessage());
@@ -230,18 +231,18 @@ class Db
     public function delete(): int
     {
         try {
-            $sql = "DELETE FROM " . self::$tablename;
-            if (!empty(self::$where)) {
-                $sql .= " " . self::$where;
+            $sql = "DELETE FROM " . $this->tablename;
+            if (!empty($this->where)) {
+                $sql .= " " . $this->where;
             }
-            self::$stmt = self::$pdo->prepare($sql);
-            if (self::$executeData !== []) {
-                self::$stmt->execute(self::$executeData);
+            $stmt = self::$pdo->prepare($sql);
+            if ($this->executeData !== []) {
+                $stmt->execute($this->executeData);
             } else {
-                self::$stmt->execute();
+                $stmt->execute();
             }
-            $result = self::$stmt->rowCount();
-            self::$stmt->closeCursor();
+            $result = $stmt->rowCount();
+            $stmt->closeCursor();
             return $result;
         } catch (PDOException $e) {
             throw new Exception("Delete failed: " . $e->getMessage());
@@ -260,12 +261,12 @@ class Db
         }
         $fields = implode(",", array_keys($data));
         $values = implode(",", array_fill(0, count($data), "?"));
-        $sql = "INSERT INTO " . self::$tablename . " ($fields) VALUES ($values)";
+        $sql = "INSERT INTO " . $this->tablename . " ($fields) VALUES ($values)";
         try {
-            self::$stmt = self::$pdo->prepare($sql);
-            self::$stmt->execute(array_values($data));
+            $stmt = self::$pdo->prepare($sql);
+            $stmt->execute(array_values($data));
             $result = self::$pdo->lastInsertId();
-            self::$stmt->closeCursor();
+            $stmt->closeCursor();
             return $result;
         } catch (PDOException $e) {
             throw new Exception("Insert failed: " . $e->getMessage());
@@ -275,7 +276,7 @@ class Db
     /**
      * Update data
      * @param array $data
-     * @return int
+     * @return int The number of rows affected
      */
     public function update(array $data): int
     {
@@ -284,15 +285,17 @@ class Db
         }
         $executeData = array_values($data);
         $set = implode("=?, ", array_keys($data)) . "=?";
-        $sql = "UPDATE " . self::$tablename . " SET $set";
-        if (!empty(self::$where)) {
-            $sql .= " " . self::$where;
+        $sql = "UPDATE " . $this->tablename . " SET $set";
+        if (!empty($this->where)) {
+            $sql .= " " . $this->where;
         }
         try {
-            self::$stmt = self::$pdo->prepare($sql);
-            self::$stmt->execute(array_merge($executeData, self::$executeData));
-            $result = self::$stmt->rowCount();
-            self::$stmt->closeCursor();
+            $stmt = self::$pdo->prepare($sql);
+            if (!$stmt->execute(array_merge($executeData, $this->executeData))) {
+                throw new Exception("Update failed: " . $stmt->errorInfo()[2]);
+            }
+            $result = $stmt->rowCount();
+            $stmt->closeCursor();
             return $result;
         } catch (PDOException $e) {
             throw new Exception("Update failed: " . $e->getMessage());
