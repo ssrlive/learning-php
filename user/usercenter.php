@@ -87,6 +87,7 @@ $log = Db::table("login_log")->where([
                         <div class="edid-box" style="display: none;">
                             <input type="text" name="newname">
                             <button id="submit" onclick="submitModify()">Submit modify</button>
+                            <button id="cancelButton" onclick="cancelClick()">Cancel</button>
                         </div>
                     </div>
                 </div>
@@ -99,6 +100,10 @@ $log = Db::table("login_log")->where([
         document.getElementById("edit-btn").addEventListener("click", function() {
             document.querySelector(".edid-box").style.display = "block";
         });
+
+        function cancelClick() {
+            document.querySelector(".edid-box").style.display = "none";
+        }
 
         function submitModify() {
             var newname = document.querySelector("input[name='newname']").value;
