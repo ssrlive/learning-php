@@ -176,7 +176,11 @@ class Db
         return $this;
     }
 
-    public function find()
+    /**
+     * Find the first record
+     * @return array|false
+     */
+    public function find(): array|false
     {
         $result = $this->limit(1)->select();
         return isset($result[0]) ? $result[0] : false;
