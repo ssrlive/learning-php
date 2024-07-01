@@ -1,11 +1,16 @@
+<?php
+require_once $_SERVER['DOCUMENT_ROOT'] . "/func/Func.php";
+?>
 <div class="header">
     <div class="container-full">
         <div class="sitename">
             Coder Old bastard
         </div>
         <div class="userinfo">
-            <?php if (isset($userinfo)) {
-                echo '<span class="username">' . $userinfo["username"] . '</span>';
+            <?php
+            if (isSessionLoggedIn()) {
+                $userinfo = getSessionLoginInfo();
+                echo '<span class="username" style="font-size: 30px; font-weight: bold;">' . $userinfo["username"] . '</span>';
                 echo ' <a href="javascript:void(0);" id="logout2" style="text-decoration: none; color: inherit;">Logout</a>';
             } else {
                 echo '<a href="/user/login.php" style="text-decoration: none; color: inherit;">Login</a>';

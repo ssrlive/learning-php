@@ -1,3 +1,10 @@
+<?php
+require_once $_SERVER['DOCUMENT_ROOT'] . "/func/Func.php";
+if (isSessionLoggedIn()) {
+    setSessionLogout();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 

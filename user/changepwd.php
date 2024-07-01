@@ -3,7 +3,6 @@
 
 <?php
 require_once $_SERVER['DOCUMENT_ROOT'] . "/func/Func.php";
-
 if (!isSessionLoggedIn()) {
     header("Location: /user/login.php");
     exit();

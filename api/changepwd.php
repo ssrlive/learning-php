@@ -13,7 +13,6 @@ if (!isSessionLoggedIn()) {
 }
 
 $message = null;
-$userinfo = getSessionLoginInfo();
 
 $oldpwd = null;
 if (isset($_POST["oldpwd"]) && !isEmpty($_POST["oldpwd"])) {
@@ -28,6 +27,7 @@ if (isset($_POST["newpwd"]) && !isEmpty($_POST["newpwd"])) {
 if ($oldpwd === null || $newpwd === null) {
     $message = "Password cannot be empty";
 } else {
+    $userinfo = getSessionLoginInfo();
     $user_id = $userinfo["userid"];
     $result = Db::table("users")->where([["id", "=", $user_id]])->find();
     if ($result) {
